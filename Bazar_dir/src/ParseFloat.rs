@@ -212,6 +212,8 @@ fn operate_multiplication_op(first:(i64,i64),second:(i64,i64)) {
 
 
 
+// todo use arr &[u8] instead of normal i128
+
 pub fn sub_int(mut val:i128,start:usize,max_power:usize) -> i128 {
 
 
