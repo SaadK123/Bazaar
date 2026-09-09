@@ -28,6 +28,9 @@ parse_int_explicit(values_helper.unwrap().1,value,value.len(),
 
 
 
+
+
+
 pub fn parse_int_with_binary(value:&[u8],start:usize,stop:usize) -> Option<i128> {
 
     let mut num:i128 = 0;
@@ -82,7 +85,7 @@ pub fn count_bits_in_value(mut val:i128) -> usize {
 }
 
 pub fn counts_number_of_decimal_power(mut num:i128) -> usize {
-    let mut power = 0;
+    let mut power = 1;
 
     while(num >= 10) {
         num = num /10;

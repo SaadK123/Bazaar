@@ -212,11 +212,6 @@ fn execute_arithmetic(content:Vec<char>) -> Option<(String,String)> {
 
 
             }
-
-
-
-
-
         }
     }
     // a changer

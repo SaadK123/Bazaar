@@ -90,7 +90,7 @@ pub fn parse_float(val:String) -> Option<(i64,u64)> {
     Some((before_point?,after_point?))
 }
 
-fn un_parse_float_decimal(float_decimal:u64) -> (u64,usize) {
+fn un_parse_float_decimal(float_decimal:u64) -> (i64,usize) {
     let mut offset_to_last_1:Option<usize> = None;
     let mut offset_to_previous_1:Option<usize> = None;
 
@@ -148,7 +148,7 @@ pub fn operate_math_on_float_int(float:(i64,u64),int:i128,order:bool,symbol:char
 }
 
 
-fn operate_arithmetic(symbol:char,float_1:(i64,u64),float_2:(i64,u64)) -> Option<(i64,u64)> {
+fn operate_arithmetic(symbol:char,float_1:(i64,i64),float_2:(i64,i64)) -> Option<(i64,i64)> {
     let mut integral_part:Option<i64>;
 
     let mut float_part:u64 = 0;
@@ -166,10 +166,61 @@ fn operate_arithmetic(symbol:char,float_1:(i64,u64),float_2:(i64,u64)) -> Option
 }
 
 
+/*
+ 10,52 * 20,12
+
+
+
+ 4      4
+ 1052 * 2012
+
+
+ 8
+
+ */
+
 fn operate_multiplication_op(first:(i64,u64),second:(i64,u64)) {
     let full_first =  shift_two_ints(first.0,first.1 as i64);
 
+    let number_till_comma =  counts_number_of_decimal_power(first.0 as i128);
+
+
     let full_second = shift_two_ints(second.0,second.1 as i64);
+
+
+    let number_till_coma_second = counts_number_of_decimal_power(second.0 as i128);
+
+
+    let offset_comma = number_till_coma_second + number_till_comma;
+
+
+    let val =  full_first * full_second;
+
+
+
+    let number_val = counts_number_of_decimal_power(val);
+
+
+
+   let mut i  = number_val;
+
+
+
+    let mut before_comma_value:i64 = 0;
+
+    let  mut after_comma_value:i64 = 0;
+
+
+    let mut ref_val:&mut i64 =  &mut after_comma_value;
+    
+    while(i > offset_comma) {
+
+
+        let curr_val = val / 10i128.pow(i-1 as );
+        i-=1;
+    }
+
+
 }
 
 
@@ -193,7 +244,7 @@ pub fn shift_two_ints(first:i64,second:i64) -> i128 {
 
 
 
-fn operate_minus_op(first:(i64,u64), mut second:(i64, u64)) -> Option<(i64, u64)>{
+fn operate_minus_op(first:(i64,i64), mut second:(i64, i64)) -> Option<(i64, i64)>{
     if(second.0 < 0) {
         second.0 = second.0 * -1;
         return operate_plus_op(first,second);
@@ -203,18 +254,18 @@ fn operate_minus_op(first:(i64,u64), mut second:(i64, u64)) -> Option<(i64, u64)
     let mut integral_part =
         try_convert_i128_to_i64(first.0 as i128 - second.0 as i128)?;
 
-    let mut floats:i64 = first.1 as i64 - second.1 as i64;
+    let mut floats:i64 = first.1 - second.1;
 
     if(floats < 0) {
-        floats = ((floats + MAX_SIZE_63_BITS) as u64) as i64;
+        floats = ((floats + MAX_SIZE_63_BITS));
         integral_part -= 1;
     }
 
-    Some((integral_part,floats as u64))
+    Some((integral_part,floats))
 }
 
 
-fn operate_plus_op(first:(i64,u64),second:(i64,u64)) -> Option<(i64,u64)> {
+fn operate_plus_op(first:(i64,i64),second:(i64,i64)) -> Option<(i64,i64)> {
    let  mut integral_part = try_convert_i128_to_i64((first.0 + second.0) as i128);
 
 
@@ -233,7 +284,7 @@ fn operate_plus_op(first:(i64,u64),second:(i64,u64)) -> Option<(i64,u64)> {
         return None;
     }
 
-     Some((integral_part.unwrap(),add as u64))
+     Some((integral_part.unwrap(),add as i64))
 }
 
 
