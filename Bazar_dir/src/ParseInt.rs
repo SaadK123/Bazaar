@@ -85,6 +85,10 @@ pub fn count_bits_in_value(mut val:i128) -> usize {
 }
 
 pub fn counts_number_of_decimal_power(mut num:i128) -> usize {
+    if(num == 0) {
+        return 0;
+    }
+
     let mut power = 1;
 
     while(num >= 10) {
@@ -121,6 +125,10 @@ pub fn parse_int_explicit(start:usize, value:&[u8], stop:usize, symbol:char, ini
     
     Some(num)
 }
+
+
+
+
 
 
 

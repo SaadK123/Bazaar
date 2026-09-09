@@ -1,9 +1,10 @@
 use std::arch::x86_64::_mm_undefined_si128;
+use std::cmp::max;
 use std::ffi::c_ushort;
 use std::pin::pin;
 use std::process::id;
 use std::sync::atomic::AtomicI64;
-use crate::{add, add_first_with_second_ref, try_convert_i128_to_i64, try_convert_i128_to_u64_with_max_63_bits_length, try_rectify_sign_power, val, MAX_SIZE_63_BITS};
+use crate::{add, add_first_with_second_ref, try_convert_i128_to_i64, try_convert_i128_to_u64_with_max_63_bits_length, try_rectify_sign_power, MAX_SIZE_63_BITS};
 use crate::ParseInt::{count_bits_in_value, counts_number_of_decimal_power, parse_int, parse_int_explicit, parse_int_with_binary};
 
 use bitvec::prelude::*;
@@ -121,7 +122,7 @@ fn un_parse_float_decimal(float_decimal:u64) -> (i64,usize) {
         }
 
     }
-    (val,number_of_points)
+    (val as i64,number_of_points)
 }
 
 
@@ -179,50 +180,72 @@ fn operate_arithmetic(symbol:char,float_1:(i64,i64),float_2:(i64,i64)) -> Option
 
  */
 
-fn operate_multiplication_op(first:(i64,u64),second:(i64,u64)) {
-    let full_first =  shift_two_ints(first.0,first.1 as i64);
 
-    let number_till_comma =  counts_number_of_decimal_power(first.0 as i128);
+/// reput in u64
+fn operate_multiplication_op(first:(i64,i64),second:(i64,i64)) {
 
+    // find bitshift of first in decimal
 
-    let full_second = shift_two_ints(second.0,second.1 as i64);
+    let offset_first = counts_number_of_decimal_power(first.1 as i128);
 
-
-    let number_till_coma_second = counts_number_of_decimal_power(second.0 as i128);
-
-
-    let offset_comma = number_till_coma_second + number_till_comma;
+    let first_shifted = shift_two_ints(first.0,first.1);
 
 
-    let val =  full_first * full_second;
+    // find bitshift of second in decimal
 
 
+    let second_shifted = shift_two_ints(second.0,second.1);
 
-    let number_val = counts_number_of_decimal_power(val);
+    let offset_second = counts_number_of_decimal_power(second.1 as i128);
 
 
-
-   let mut i  = number_val;
+    let max_offset = offset_first + offset_second;
 
 
 
-    let mut before_comma_value:i64 = 0;
-
-    let  mut after_comma_value:i64 = 0;
+    let val =  first_shifted * second_shifted;
 
 
-    let mut ref_val:&mut i64 =  &mut after_comma_value;
-    
-    while(i > offset_comma) {
-
-
-        let curr_val = val / 10i128.pow(i-1 as );
-        i-=1;
-    }
 
 
 }
 
+
+
+pub fn sub_int(mut val:i128,start:usize,max_power:usize) -> i128 {
+
+
+
+    let mut new_val:i128 = 0;
+
+    let number_of_powers = counts_number_of_decimal_power(val)-1;
+
+    if(number_of_powers == 0) {
+        return 0;
+    }
+
+
+
+    if(max_power > number_of_powers) {
+        return 0;
+    }
+
+
+    let mut index = start;
+    for i in  start..=number_of_powers {
+
+
+        let curr_val = val / 10i128.pow((number_of_powers - i) as u32) / index as i128;
+
+
+        new_val += curr_val;
+        index+=1;
+    }
+
+
+    return new_val;
+
+}
 
 pub fn shift_two_ints(first:i64,second:i64) -> i128 {
     let mut num:i128 = 0;
@@ -239,7 +262,7 @@ pub fn shift_two_ints(first:i64,second:i64) -> i128 {
         num << (second << i);
     }
 
-    return 0;
+    num
 }
 
 
