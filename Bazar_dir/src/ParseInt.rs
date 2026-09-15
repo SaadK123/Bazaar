@@ -91,6 +91,8 @@ pub fn counts_number_of_decimal_power(mut num:i128) -> usize {
 
     let mut power = 1;
 
+
+    // 100
     while(num >= 10) {
         num = num /10;
         power += 1;

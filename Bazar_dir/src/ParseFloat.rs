@@ -4,7 +4,8 @@ use std::ffi::c_ushort;
 use std::pin::pin;
 use std::process::id;
 use std::sync::atomic::AtomicI64;
-use crate::{add, add_first_with_second_ref, try_convert_i128_to_i64, try_convert_i128_to_u64_with_max_63_bits_length, try_rectify_sign_power, MAX_SIZE_63_BITS};
+use std::time::TryFromFloatSecsError;
+use crate::{add, add_first_with_second_ref, convert_int_to_u8_arr, try_convert_i128_to_i64, try_convert_i128_to_u64_with_max_63_bits_length, try_rectify_sign_power, MAX_SIZE_63_BITS};
 use crate::ParseInt::{count_bits_in_value, counts_number_of_decimal_power, parse_int, parse_int_explicit, parse_int_with_binary};
 
 use bitvec::prelude::*;
@@ -176,13 +177,16 @@ fn operate_arithmetic(symbol:char,float_1:(i64,i64),float_2:(i64,i64)) -> Option
  1052 * 2012
 
 
+211,6624
  8
 
  */
 
+fn operate_division_op(first:(i64,i64),second:(i64,i64)) {
 
+}
 /// reput in u64
-fn operate_multiplication_op(first:(i64,i64),second:(i64,i64)) {
+fn operate_multiplication_op(first:(i64,i64),second:(i64,i64)) -> (i64,i64) {
 
     // find bitshift of first in decimal
 
@@ -206,48 +210,43 @@ fn operate_multiplication_op(first:(i64,i64),second:(i64,i64)) {
     let val =  first_shifted * second_shifted;
 
 
+    let part_after =  sub_int(val,0,max_offset) as i64;
+
+    let part_before = sub_int(val, max_offset, 39-max_offset) as i64;
 
 
+    return  (part_before,part_after);
 }
 
 
 
 // todo use arr &[u8] instead of normal i128
 
-pub fn sub_int(mut val:i128,start:usize,max_power:usize) -> i128 {
+pub fn sub_int(mut val:i128,start:usize,end:usize) -> i128 {
 
+   let mut index = 0;
 
+    let mut sub:i128 = 0;
+    while(index < end) {
 
-    let mut new_val:i128 = 0;
+        if val == 0 {
+            return sub;
+        }
 
-    let number_of_powers = counts_number_of_decimal_power(val)-1;
+        if index >= start {
+            let curr_digit =  val % 10;
 
-    if(number_of_powers == 0) {
-        return 0;
+            sub += curr_digit * 10i128.pow((index - start) as u32);
+        }
+        index +=1;
+        val /=10;
     }
 
-
-
-    if(max_power > number_of_powers) {
-        return 0;
-    }
-
-
-    let mut index = start;
-    for i in  start..=number_of_powers {
-
-
-        let curr_val = val / 10i128.pow((number_of_powers - i) as u32) / index as i128;
-
-
-        new_val += curr_val;
-        index+=1;
-    }
-
-
-    return new_val;
-
+     sub
 }
+
+
+
 
 pub fn shift_two_ints(first:i64,second:i64) -> i128 {
     let mut num:i128 = 0;

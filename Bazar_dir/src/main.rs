@@ -2,7 +2,7 @@
 mod ParseInt;
 mod ParseFloat;
 
-use std::ffi::c_void;
+use std::ffi::{c_ushort, c_void};
 use std::io::empty;
 use std::io::ErrorKind::Other;
 use std::ops::Index;
@@ -14,7 +14,7 @@ use crate::ArithmeticOperator::AddSub;
 use crate::ArithmeticOperator::MulDiv;
 use crate::ArithmeticOperator::None;
 use crate::ParseFloat::parse_float;
-use crate::ParseInt::parse_int;
+use crate::ParseInt::{count_bits_in_value, parse_int};
 
 
 
@@ -23,22 +23,62 @@ use crate::ParseInt::parse_int;
 
 fn main() {
 
-    let mut v = vec![0,1,2];
+    let n = 0.1;
 
-    let first = &v[0];
+    let n1 = 0.2;
 
-    v.push(3);
-
-    println!("{}",2)
+    println!("{}", n + n1);
 
 }
 
 
+pub fn convert_int_to_u8_arr(val:i128) -> Option<Vec<u8>> {
 
+
+    let mut size = count_bits_in_value(val);
+
+    let modulo = size % 8;
+    if(modulo != 0 ) {
+        size += 8 - modulo;
+    }
+
+
+    let mut arr:Vec<u8> = vec![0;size/8];
+
+    let mut index_arr = 0;
+
+    let mut index_bit = 0;
+
+
+    let mut val_8_bits:u8 = 0;
+
+    for i in 0..128 {
+
+        val_8_bits  += ((val >> i) & 1) as u8 * 2u8.pow(index_bit);
+
+        index_bit += 1;
+
+        if(index_bit == 8) {
+            arr[index_arr] = val_8_bits;
+            
+            index_arr +=1;
+
+            index_bit = 0;
+
+            val_8_bits = 0;
+        }
+
+        if(index_arr == size) {
+            return Some(arr);
+        }
+    }
+
+return Option::None;
+
+}
 fn read_code(start : i32,code: &str,token :&mut String) {
 
    token.clear();
-
 
     for i in code.chars().skip(start as usize) {
 
@@ -52,7 +92,6 @@ fn read_code(start : i32,code: &str,token :&mut String) {
 
     }
 }
-
 
 fn add(first:&mut Vec<char>,second:String) {
 
